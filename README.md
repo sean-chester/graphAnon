@@ -3,7 +3,7 @@
                    AlphaProximity suite, version 1.0
 
                          © 2015, Sean Chester
-                          (schester@cs.au.dk)
+                      (sean.chester@idi.ntnu.no)
                           All rights reserved. 
 
 This is the AlphaProximity suite, version 1.0, with software for 
@@ -21,8 +21,8 @@ encouraged to read the short article:
 Licensing
 ---------
 
-You are free to use and redistribute this software as you see fit. 
-Consult the attached LICENSE for more details.
+You are free to use, modify, and redistribute this software as you  
+see fit. Consult the attached LICENSE.md for more details.
 
 
 
@@ -43,15 +43,15 @@ To generate an executable, simply type "make all" from the root directory
 of this package (the same directory in which you found this README file).
 The makefile will generate the executable bin/alpha_proximity. If you 
 encounter difficulties, try first typing "make deepclean" and ensure that
-the bin/ directory exists. You can run the executable from a console with 
+the bin/ directory exists. You can run the executable from a terminal with 
 no command line arguments to get usage instructions. 
 
 
 Contact
 -------
 
-This software suite may be updated and so you are encouraged to contact 
-the author (schester@cs.au.dk) to enquire as to whether this is the 
-latest version. Also, please do not hesitate to contact the author if 
-you have comments, questions, or bugs to report. 
+This software suite may be updated and so you are encouraged to check  
+https://github.com/sean-chester/anon to ensure this is the latest 
+version. Also, please do not hesitate to contact the author if you have 
+comments, questions, or bugs to report. 
 
