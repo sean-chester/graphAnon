@@ -3,43 +3,32 @@
  * @brief The definition of a Label Distribution (Definition 2.3 in @cite asonam)
  * @see label_distribution.test.h (The unit test suite for this class)
  *
- * @date Jun 12, 2015
- * @version 1.0
- * @author Sean Chester (schester@cs.au.dk)
+ * @date 22 Oct 2015
+ * @version 1.1
+ * @author Sean Chester (sean.chester@idi.ntnu.no)
  *
- * @copyright &copy; 2015, Sean Chester (schester@cs.au.dk)<br />
- *  All rights reserved.
- *                         <br /><br />
- *  This file is a part of the AlphaProximity suite.
- *  The AlphaProximity suite is free software: redistribution and use in
- *  source and binary forms, with or without modification, are
- *  permitted provided that the following conditions are met:
- *                         <br /><br />
- *  1. Redistributions of source code must retain the above copyright
- *  notice, this list of conditions and the following disclaimer.
- *                         <br /><br />
- *  2. Redistributions in binary form must reproduce the above copyright
- *  notice, this list of conditions and the following disclaimer in the
- *  documentation and/or other materials provided with the distribution.
- *                         <br /><br />
- *  3. Neither the name of the copyright holder nor the names of its
- *  contributors may be used to endorse or promote products derived
- *  from this software without specific prior written permission.
- *                         <br /><br />
- *  4. Any and all academic use of this, or any part of this, software
- *  must cite the article referenced here: @cite asonam .
- *                         <br /><br />
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- *  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * @copyright Copyright (c) 2015 Sean Chester
+ * <br />
+ * This file is part of the GraphAnon suite.
+ * GraphAnon, version 2.0, is distributed freely under the *MIT License*:
+ * <br />
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * <br />
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * <br />
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #ifndef LABEL_DISTRIBUTION_H_

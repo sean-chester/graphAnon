@@ -1,8 +1,8 @@
 ############################################################
-#            Makefile for AlphaProximity Suite             #
+#               Makefile for GraphAnon Suite               #
 #                                                          #
 #             Copyright (c) 2015, Sean Chester             #
-#                    (schester@cs.au.dk)                   #
+#               (sean.chester@idi.ntnu.no)                 #
 ############################################################
 
 RM = rm -rf
@@ -10,28 +10,29 @@ MV = mv
 CP = cp -rf
 CC = g++
 
-TARGET = $(OUT)/alpha_proximity
+TARGET = $(OUT)/graphAnon
 
-SRC = $(wildcard src/*.cpp)
+SRC = $(wildcard src/*.cpp) $(wildcard src/labelled_graph/*.cpp) \
+			 $(wildcard src/unlabelled_graph/*.cpp)
 
 OBJ = $(addprefix $(OUT)/,$(notdir $(SRC:.cpp=.o)))
 
 OUT = bin
 
 LIB_DIR = # used as -L$(LIB_DIR)
-INCLUDES = -I ./src/
+INCLUDES = -I ./src/:./src/labelled_graph/:./src/unlabelled_graph/
 
 LIB = 
 
 # Forces make to look these directories
-VPATH = src:
+VPATH = src:src/labelled_graph:src/unlabelled_graph
 
 # By default compiling for performance (optimal)
 CXXFLAGS = -O3 -m64 -march=native -mavx \
        -Wno-deprecated -Wno-write-strings -nostdlib -Wpointer-arith \
-       -Wcast-qual -Wcast-align -std=c++0x 
+       -Wcast-qual -Wcast-align -std=c++0x -fopenmp 
            
-LDFLAGS=-m64 #-lrt 
+LDFLAGS=-m64 -mavx -march=native -fopenmp #-lrt 
 
 # All Target
 all: $(TARGET)

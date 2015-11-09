@@ -1,44 +1,33 @@
 /**
  * @file
- * @brief Implementation of the Graph class in graph.h
+ * @brief Implementation of the LabelledGraph class in labelled_graph.h
  *
- * @date Jun 12, 2015
- * @version 1.0
- * @author Sean Chester (schester@cs.au.dk)
+ * @date 22 Oct 2015
+ * @version 2.0
+ * @author Sean Chester (sean.chester@idi.ntnu.no)
  *
- * @copyright &copy; 2015, Sean Chester (schester@cs.au.dk)<br />
- *  All rights reserved.
- *                         <br /><br />
- *  This file is a part of the AlphaProximity suite.
- *  The AlphaProximity suite is free software: redistribution and use in
- *  source and binary forms, with or without modification, are
- *  permitted provided that the following conditions are met:
- *                         <br /><br />
- *  1. Redistributions of source code must retain the above copyright
- *  notice, this list of conditions and the following disclaimer.
- *                         <br /><br />
- *  2. Redistributions in binary form must reproduce the above copyright
- *  notice, this list of conditions and the following disclaimer in the
- *  documentation and/or other materials provided with the distribution.
- *                         <br /><br />
- *  3. Neither the name of the copyright holder nor the names of its
- *  contributors may be used to endorse or promote products derived
- *  from this software without specific prior written permission.
- *                         <br /><br />
- *  4. Any and all academic use of this, or any part of this, software
- *  must cite the article referenced here: @cite asonam .
- *                         <br /><br />
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- *  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * @copyright Copyright (c) 2015 Sean Chester
+ * <br />
+ * This file is part of the GraphAnon suite.
+ * GraphAnon, version 2.0, is distributed freely under the *MIT License*:
+ * <br />
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * <br />
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * <br />
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include <cstdint>		/* for uint32_t */
@@ -53,9 +42,9 @@
 #include <vector>
 #include <unordered_set>
 
-#include "graph.h" /* implementing this class. */
+#include "labelled_graph.h" /* implementing this class. */
 
-void Graph::init() {
+void LabelledGraph::init() {
 	/* Initialize adjacency list with n_ empty vectors and every vertex
 	 * to have the same label. */
 	adjacency_list_.reserve( n_ );
@@ -71,10 +60,10 @@ void Graph::init() {
 	srand (time(NULL));
 }
 
-Graph::Graph( const uint32_t num_vertices, const uint32_t num_labels ) :
-	n_ ( num_vertices ), l_ ( num_labels ) { init(); }
+LabelledGraph::LabelledGraph( const uint32_t num_vertices, const uint32_t num_labels ) :
+	UnlabelledGraph( num_vertices ), l_ ( num_labels ) { init(); }
 
-Graph::Graph( const std::string filename ) {
+LabelledGraph::LabelledGraph( const std::string filename ) {
 	std::string line;
 	std::cout << filename << std::endl;
 	std::ifstream infile( filename );
@@ -89,7 +78,7 @@ Graph::Graph( const std::string filename ) {
 	/* check whether n_ was at least read correctly -- the only real
 	 * error checking done in this constructor.
 	 */
-	if( n_ < 0 ) {
+	if( n_ <= 0 ) {
 		std::cerr << "Did not parse a positive number of vertices from input file. "
 				<< "Did you format the file correctly and specify the correct path?"
 				<< std::endl;
@@ -126,58 +115,9 @@ Graph::Graph( const std::string filename ) {
 	}
 }
 
-Graph::~Graph() {}
+LabelledGraph::~LabelledGraph() {}
 
-bool Graph::add_edge( const uint32_t u, const uint32_t v ) {
-	if( adjacency_list_[ u ].count( v ) > 0 || u == v ) { return false; }
-	adjacency_list_[ u ].insert( v );
-	adjacency_list_[ v ].insert( u );
-	++m_;
-	return true;
-}
-
-void Graph::add_random_edge() {
-
-	/* Error checking -- are there edges to add? */
-	if( is_complete() ) { return; }
-
-	while( true ) {
-		/* get random edge */
-		const uint32_t u = rand() % n_;
-		const uint32_t v = rand() % n_;
-
-		/* add it if it doesn't yet exist */
-		if ( add_edge( u, v ) ) { return; }
-	}
-}
-
-
-bool Graph::populate_uniformly( const uint32_t num_edges ) {
-	/* error checking: can we add this many edges? */
-	if ( num_edges > n_ * ( n_ - 1 ) - m_ ) { return false; }
-
-	/* create a list of all possible edges and randomly shuffle the list */
-	std::vector< std::pair < uint32_t, uint32_t > > possible_edges;
-	for( uint32_t i = 0; i < n_; ++i ) {
-		for( uint32_t j = i + 1; j < n_; ++j ) {
-			possible_edges.push_back( std::pair< uint32_t, uint32_t > ( i, j ) );
-		}
-	}
-	std::random_shuffle( possible_edges.begin(), possible_edges.end() );
-
-	/* Add the first num_edges randomly shuffled edges that do not already
-	 * exist in the graph.
-	 */
-	uint32_t num_added = 0;
-	for( auto it = possible_edges.begin(); it != possible_edges.end(); ++it ) {
-		if ( add_edge( it->first, it->second ) ) {
-			if( ++num_added == num_edges ) { return true; } /* Done! */
-		}
-	}
-	return false; /* should be an unreachable statement! */
-}
-
-void Graph::evenly_distribute_labels() {
+void LabelledGraph::evenly_distribute_labels() {
 	const uint32_t vertices_per_label = n_ / l_;
 	uint32_t labels_left = n_ - vertices_per_label;
 
@@ -216,14 +156,7 @@ void Graph::evenly_distribute_labels() {
 	}
 }
 
-bool Graph::is_complete() { return m_ == n_ * ( n_ - 1 ); }
-
-float Graph::get_occupancy() {
-	if( n_ == 0 ) { return 0; }
-	else return m_ / (float) ( n_ * ( n_ - 1 ) ) * 2; /* x2 because undirected */
-}
-
-void Graph::print( std::ofstream *outstream ) {
+void LabelledGraph::print( std::ofstream *outstream ) {
 	(*outstream) << n_ << " " << l_ << std::endl;
 	for( uint32_t i = 0; i < n_; ++i ) {
 		(*outstream) << vertex_labels_[ i ] << " ";
@@ -234,7 +167,7 @@ void Graph::print( std::ofstream *outstream ) {
 	}
 }
 
-void inline Graph::get_global_ld( LabelDistribution **ld ) {
+void inline LabelledGraph::get_global_ld( LabelDistribution **ld ) {
 
 	/* Initialize an empty solution. */
 	std::vector< uint32_t > counts;
@@ -251,7 +184,8 @@ void inline Graph::get_global_ld( LabelDistribution **ld ) {
 	*ld = new LabelDistribution( &counts );
 }
 
-void inline Graph::get_neighbourhood_ld( LabelDistribution **ld, const uint32_t v ) {
+void inline LabelledGraph::get_neighbourhood_ld( LabelDistribution **ld, 
+	const uint32_t v ) {
 
 	/* Initialize an empty solution. */
 	std::vector< uint32_t > counts;
@@ -271,7 +205,7 @@ void inline Graph::get_neighbourhood_ld( LabelDistribution **ld, const uint32_t 
 	*ld = new LabelDistribution( &counts );
 }
 
-bool Graph::is_alpha_proximal( const float alpha ) {
+bool LabelledGraph::is_alpha_proximal( const float alpha ) {
 	LabelDistribution *global, *neighbourhood;
 	float max_distance = 0;
 
@@ -291,7 +225,7 @@ bool Graph::is_alpha_proximal( const float alpha ) {
 	return max_distance <= alpha;
 }
 
-void Graph::hopeful( const float alpha ) {
+void LabelledGraph::hopeful( const float alpha ) {
 	bool leaks_privacy = !is_alpha_proximal( alpha );
 	while( leaks_privacy && !is_complete() ) {
 		if( is_alpha_proximal( alpha ) ) { leaks_privacy = false; }
@@ -299,7 +233,7 @@ void Graph::hopeful( const float alpha ) {
 	}
 }
 
-uint32_t Graph::run_greedy_iteration( const float alpha ) {
+uint32_t LabelledGraph::run_greedy_iteration( const float alpha ) {
 
 	LabelDistribution *global, *neighbourhood;
 	std::vector< std::pair< uint32_t, uint32_t > > visit_order;
@@ -366,7 +300,7 @@ uint32_t Graph::run_greedy_iteration( const float alpha ) {
 	return num_edges_added;
 }
 
-void Graph::greedy( const float alpha ) {
+void LabelledGraph::greedy( const float alpha ) {
 	bool leaks_privacy = !is_alpha_proximal( alpha );
 	while( leaks_privacy && !is_complete() ) {
 		const uint32_t num_new_edges = run_greedy_iteration( alpha );
