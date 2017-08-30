@@ -146,6 +146,7 @@ uint32_t run_attribute_mode( int argc, char** argv ) {
 	}
 	if( filename != 0 ) {
 		g = new LabelledGraph( filename );
+		assert( g != NULL );
 	}
 	else {
 		/* Gather parametres for a random graph */
@@ -260,6 +261,7 @@ uint32_t run_identity_mode( int argc, char** argv ) {
 			
 			return 1;
 		}
+		assert( g != NULL );
 	}
 	else {
 		/* Gather parametres for a random graph */
@@ -282,6 +284,7 @@ uint32_t run_identity_mode( int argc, char** argv ) {
 					
 			return 1;
 		}
+		assert( g != NULL );
 	}
 	
 	/* Determine whether or not all vertices should be hidden. */
