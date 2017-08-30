@@ -30,6 +30,7 @@
 
 #include <unordered_set>
 #include <queue>
+#include <cassert>
 
 #include "omp.h"
 
@@ -178,10 +179,16 @@ uint32_t inline anonymize_degree_sequence( DegreeSequence *degrees, const uint32
 	}
 	
 	/* Update degrees to k-anonymize the degree sequence by replaying the
-	 * dynamic programming results backwards. */
-	for( int i = n - 1; i >= 0; i = starts[ i ] - 1 ) {
+	 * dynamic programming results backwards. 
+	 * Be aware of crazy loop logic arising from use of unsigned ints: 
+	 * the termination condition is when i == -1, which for unsigned ints 
+	 * means that i == max_int > n.
+	 */
+	for( uint32_t i = n - 1; i < n; i = starts[ i ] - 1 ) {
 		const uint32_t block_start = starts[ i ];
+		assert( block_start < i );
 		const uint32_t block_degree = degrees->at( block_start ).first;
+		assert( block_degree <= n );
 		for( uint32_t j = block_start + 1; j <= i; ++j ) {
 			degrees->at( j ).first = block_degree;
 		}

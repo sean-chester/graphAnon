@@ -152,11 +152,15 @@ uint32_t run_attribute_mode( int argc, char** argv ) {
 		char *graph_size = getCmdOption( argv, argv + argc, "-n", true );
 		char *occupancy = getCmdOption( argv, argv + argc, "-occ", true );
 		char *alphabet_size = getCmdOption( argv, argv + argc, "-l", true );
-		if( graph_size > 0 && occupancy > 0 && alphabet_size > 0 ) {
-			g = new LabelledGraph( atoi( graph_size ), atoi( alphabet_size ) );
+		
+		size_t const n = atoi( graph_size );
+		size_t const l = atoi( alphabet_size );
+		float const occ = atof( occupancy );
+		
+		if( n > 0 && occ > 0 && l > 0 ) {
+			g = new LabelledGraph( n, l );
 			g->evenly_distribute_labels();
-			const uint32_t num_edges = atof( occupancy ) * atoi( graph_size ) *
-					( atoi( graph_size ) - 1 ) / 2; /* 1/2 b/c undirected */
+			const uint32_t num_edges = occ * n * ( n - 1 ) / 2; /* 1/2 b/c undirected */
 			g->populate_uniformly( num_edges );
 		}
 		else {
@@ -166,7 +170,6 @@ uint32_t run_attribute_mode( int argc, char** argv ) {
 					<< "or provide an input file (e.g., -n 100 =occ .01 -l 2)"
 					<< std::endl;
 					
-			delete g;
 			return 1;
 		}
 	}
@@ -194,12 +197,12 @@ uint32_t run_attribute_mode( int argc, char** argv ) {
 
 	/* If requested in command line args, echo to stdout the orig graph stats. */
 	char *stats = getCmdOption( argv, argv + argc, "-stats", false );
-	if( stats > 0 ) { print_stats( g ); }
+	if( stats != NULL ) { print_stats( g ); }
 
 
 	/* If requested in command line args, write output Graph to file. */
 	char *output_filename = getCmdOption( argv, argv + argc, "-o", true );
-	if( output_filename > 0 ) {
+	if( output_filename != NULL ) {
 		std::ofstream outfile;
 		outfile.open( output_filename );
 		g->print( &outfile );
@@ -263,10 +266,12 @@ uint32_t run_identity_mode( int argc, char** argv ) {
 		char *graph_size = getCmdOption( argv, argv + argc, "-n", true );
 		char *occupancy = getCmdOption( argv, argv + argc, "-occ", true );
 		
-		if( graph_size > 0 && occupancy > 0 ) {
-			g = new UnlabelledGraph( atoi( graph_size ) );
-			const uint32_t num_edges = atof( occupancy ) * atoi( graph_size ) *
-					( atoi( graph_size ) - 1 ) / 2; /* 1/2 b/c undirected */
+		size_t const n = atoi( graph_size );
+		float const occ = atof( occupancy );
+		
+		if( n > 0 && occ > 0 ) {
+			g = new UnlabelledGraph( n );
+			const uint32_t num_edges = occ * n * ( n - 1 ) / 2; /* 1/2 b/c undirected */
 			g->populate_uniformly( num_edges );
 		}
 		else {
@@ -275,17 +280,15 @@ uint32_t run_identity_mode( int argc, char** argv ) {
 					<< "or provide an input file (e.g., -n 100 =occ .01 -l 2)"
 					<< std::endl;
 					
-			delete g;
 			return 1;
 		}
 	}
-	const float original_occupancy = g->get_occupancy();
 	
 	/* Determine whether or not all vertices should be hidden. */
 	char *hide_all = getCmdOption( argv, argv + argc, "-hide-additional", false );
 	
 	/* Execute algorithm. */
-	if( hide_all > 0 ) {
+	if( hide_all != NULL ) {
 		g->hide_waldo< true >( atoi( k ) );
 		if( !g->is_anonymous( atoi( k ) ) ) {
 			std::cerr << "This instance was evidently not solved. ";
@@ -299,11 +302,11 @@ uint32_t run_identity_mode( int argc, char** argv ) {
 
 	/* If requested in command line args, echo to stdout the anon graph stats. */
 	char *stats = getCmdOption( argv, argv + argc, "-stats", false );
-	if( stats > 0 ) { print_stats( g ); }
+	if( stats != NULL ) { print_stats( g ); }
 	
 	/* If requested in command line args, write output Graph to file. */
 	char *output_filename = getCmdOption( argv, argv + argc, "-o", true );
-	if( output_filename > 0 ) {
+	if( output_filename != NULL ) {
 		std::ofstream outfile;
 		outfile.open( output_filename );
 		g->print( &outfile );
@@ -327,15 +330,15 @@ uint32_t run_identity_mode( int argc, char** argv ) {
 int main(int argc, char** argv) {
 
 	/* Parse input parametres to create a graph. */
-	if( argc == 1 || getCmdOption( argv, argv + argc, "-h", false ) > 0
-			|| getCmdOption( argv, argv + argc, "--help", false ) > 0 ) {
+	if( argc == 1 || getCmdOption( argv, argv + argc, "-h", false ) != NULL
+			|| getCmdOption( argv, argv + argc, "--help", false ) != NULL ) {
 
 		print_usage_instructions( *argv );
 		return 0;
 	}
 
 	char *mode = getCmdOption( argv, argv + argc, "-mode", true );
-	if( mode == 0 ) {
+	if( mode == NULL ) {
 			//print_usage_instructions( *argv );
 			std::cerr << std::endl
 					<< "\tYou must specify an operation mode (e.g., -mode attribute)"

@@ -413,7 +413,9 @@ double UnlabelledGraph::subgraph_centrality( const uint32_t limit ) {
 		new_values = tmp;
 	}
 	
-	delete [] adjacency_matrix, adjacency_matrix_to_lth, new_values;
+	delete [] adjacency_matrix;
+	delete [] adjacency_matrix_to_lth;
+	delete [] new_values;
 	return summation / n_;
 }
 
