@@ -141,6 +141,19 @@ uint32_t inline anonymize_degree_sequence( DegreeSequence *degrees, const uint32
 	
 	const uint32_t n = degrees->size();
 	
+	// Check if the graph is large enough to meaningfully anonymise. 
+	// Cannot split fewer than 2k vertices into two groups; so, a graph 
+	// of n < 2k vertices must already be transformed into the complete graph.
+	if( n < 2 * k )
+	{
+		uint32_t deficiency = 0;
+		for( uint32_t i = 1; i < n; ++i )
+		{
+			deficiency += degrees->at( 0 ).first - degrees->at( i ).first;
+		}
+		return deficiency;
+	}
+	
 	/* arrays to store dynamic programming results. */
 	uint32_t costs[ n ];
 	uint32_t starts[ n ];
@@ -214,7 +227,9 @@ void inline UnlabelledGraph::retrieve_degree_sequence( DegreeSequence *degrees )
 
 template < bool hide_new_vertices >
 void UnlabelledGraph::hide_waldo( const uint32_t k ) {
-
+	
+	assert( k <= n_ );
+	
 	/* Section 3.1: First anonymize degree sequence. */
 	DegreeSequence degrees;
 	retrieve_degree_sequence( &degrees );
