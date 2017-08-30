@@ -12,6 +12,7 @@
   * [Introduction](#introduction)
   * [Requirements](#requirements)
   * [Installation](#installation)
+  * [Input data format](#data-format)
   * [Documentation](#documentation)
   * [License](#license)
   * [Contact](#contact)
@@ -73,6 +74,28 @@ The makefile will generate the executable `bin/graphAnon`. If you
 encounter difficulties, try first typing `make deepclean` and ensure that
 the `bin/` directory exists. You can run the executable from a terminal with 
 no command line arguments to get usage instructions. 
+
+
+
+------------------------------------
+### Input data format
+<a name="data-format" ></a>
+
+The default input format is an _adjacency list_ format. 
+Each line _i_ includes a space-separated list of all nodes _j_ for which the edge _(i,j)_ exists, 
+beginning with _i=0_.
+For example, the (undirected) [Diamond Graph](https://en.wikipedia.org/wiki/Diamond_graph), with nodes numbered 
+anti-clockwise starting from the bottom-most node, would be represented by the following adjacency list:
+
+> 1 2 3
+>
+> 0 2
+>
+> 0 1 3
+>
+> 1 3
+
+More examples can be found in the `workloads/` directory.
 
 
 
