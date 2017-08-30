@@ -62,19 +62,22 @@ GraphAnon relies on the following packages/libraries:
 
  * OpenMP for to parallelise the calculation of graph statistics
  * C++ 11 for newer STL containers such as unordered_set
+ * CMake (version 3.4 or higher) for auto-generating a makefile
 
 
 ------------------------------------
 ### Installation
 <a name="installation" ></a>
 
-To generate an executable, simply type `make all` from the root directory
-of this package (the same directory in which you found this `README.md` file).
-The makefile will generate the executable `bin/graphAnon`. If you 
-encounter difficulties, try first typing `make deepclean` and ensure that
-the `bin/` directory exists. You can run the executable from a terminal with 
-no command line arguments to get usage instructions. 
+GraphAnon is built using `CMake`. Create an out-of-source directory 
+(e.g., `bin/` or `debug/`) and then run `cmake ../src` to generate a makefile. 
+Then run `make` to build the executable. You can optionally run `cmake` 
+with the `-DCMAKE_BUILD_TYPE=Debug` or `-DCMAKE_BUILD_TYPE=Release` options to 
+compile explicitly in _debug_ (for development) or _release_ (for performance) 
+modes, respectively.
 
+To clean the project, you can simply delete the out-of-source directory that 
+you created; e.g., `rm -rf bin`.
 
 
 ------------------------------------
@@ -82,11 +85,14 @@ no command line arguments to get usage instructions.
 <a name="data-format" ></a>
 
 The default input format is an _adjacency list_ format. 
-Each line _i_ includes a space-separated list of all nodes _j_ for which the edge _(i,j)_ exists, 
+The first line gives the number of vertices in the file.
+Each subsequent line _i_ includes a space-separated list of all nodes _j_ for which the edge _(i,j)_ exists, 
 beginning with _i=0_.
 For example, the (undirected) [Diamond Graph](https://en.wikipedia.org/wiki/Diamond_graph), with nodes numbered 
 anti-clockwise starting from the bottom-most node, would be represented by the following adjacency list:
 
+> 4
+> 
 > 1 2 3
 >
 > 0 2
