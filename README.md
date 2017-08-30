@@ -91,15 +91,13 @@ beginning with _i=0_.
 For example, the (undirected) [Diamond Graph](https://en.wikipedia.org/wiki/Diamond_graph), with nodes numbered 
 anti-clockwise starting from the bottom-most node, would be represented by the following adjacency list:
 
-> 4
-> 
-> 1 2 3
->
-> 0 2
->
-> 0 1 3
->
-> 1 3
+```
+4
+1 2 3
+0 2
+0 1 3
+1 3
+```
 
 More examples can be found in the `workloads/` directory.
 
