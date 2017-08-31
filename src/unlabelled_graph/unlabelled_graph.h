@@ -2,11 +2,7 @@
  * @file
  * @brief Definition of a simple, undirected, unlabelled Graph class.
  *
- * @date 22 Oct 2015
- * @version 2.0
- * @author Sean Chester (sean.chester@idi.ntnu.no)
- *
- * @copyright Copyright (c) 2015 Sean Chester
+ * @copyright Copyright (c) 2015-2017 Sean Chester
  * <br />
  * This file is part of the GraphAnon suite.
  * GraphAnon, version 2.0, is distributed freely under the *MIT License*:
@@ -41,51 +37,57 @@
 #include <unordered_set>
 #include <map>
 
-/**
- * The file format is an adjacency list. 
- * The first row gives white-space separated meta-data about 
- * the UnlabelledGraph, namely the number of vertices (e.g., "6" is a 6-node 
- * graph). Each subsequent line corresponds to one vertex with a variable-length 
- * list of space-separated integers indicating the node ids of all neighbours 
- * (e.g., "1 2 5 9" indicates a vertex with who is connected (only) to vertices 
- * 1, 2, 5, and 9. Note that there should be exactly n+1 lines in the file, 
- * the first line should contain exactly one number, and every subsequent line 
- * can contain zero or more point ids.
- */
-#define FILE_TYPE_ADJLIST	0
-
-/**
- * The file format is a vertex-labelled adjacency list. 
- * The first row gives white-space
- * separated meta-data about the LabelledGraph, namely the number of vertices
- * and then the number of distinct labels (e.g., "6 2" is a 6-node graph
- * that has a binary label alphabet).
- * Each subsequent line corresponds to a vertex. The first value is the
- * label of the vertex, and the remaining variable-length space-separated
- * integers are the node ids of all neighbours (e.g., "1 2 5 9" indicates a
- * vertex with label 1 who is connected (only) to vertices 2, 5, and 9.
- * Note that there should beexactly n+1 lines in the file, the first line
- * should contain exactly two numbers, and every subsequent line must
- * contain at least one number.
- */
-#define FILE_TYPE_ADJLIST_VL	1
-
-/**
- * Input file is a list of edges. The first line is a single number indicating 
- * the number of vertices in the graph. Each subsequent line gives two white-space 
- * separated integers representing the origin and destination of an edge, respectively.
- * E.g., Figure 1 of @cite waldo would be represented as follows:
- * <pre>4
- * 0 1 
- * 1 0 
- * 1 2 
- * 1 3 
- * 2 1 
- * 2 3 
- * 3 1 
- * 3 2</pre>
- */
-#define FILE_TYPE_EDGELIST	2
+namespace graphAnon
+{
+	/** The supported file formats for ascii representations of undirected graphs. */
+	enum class FileFormat {
+		/**
+		 * The file format is an adjacency list. 
+		 * The first row gives white-space separated meta-data about 
+		 * the UnlabelledGraph, namely the number of vertices (e.g., "6" is a 6-node 
+		 * graph). Each subsequent line corresponds to one vertex with a variable-length 
+		 * list of space-separated integers indicating the node ids of all neighbours 
+		 * (e.g., "1 2 5 9" indicates a vertex with who is connected (only) to vertices 
+		 * 1, 2, 5, and 9. Note that there should be exactly n+1 lines in the file, 
+		 * the first line should contain exactly one number, and every subsequent line 
+		 * can contain zero or more point ids.
+		 */
+		adjacencyList, 
+		
+		/**
+		 * The file format is a vertex-labelled adjacency list. 
+		 * The first row gives white-space
+		 * separated meta-data about the LabelledGraph, namely the number of vertices
+		 * and then the number of distinct labels (e.g., "6 2" is a 6-node graph
+		 * that has a binary label alphabet).
+		 * Each subsequent line corresponds to a vertex. The first value is the
+		 * label of the vertex, and the remaining variable-length space-separated
+		 * integers are the node ids of all neighbours (e.g., "1 2 5 9" indicates a
+		 * vertex with label 1 who is connected (only) to vertices 2, 5, and 9.
+		 * Note that there should beexactly n+1 lines in the file, the first line
+		 * should contain exactly two numbers, and every subsequent line must
+		 * contain at least one number.
+		 */		
+		adjacencyListVertexLabelled,
+		
+		/**
+		 * Input file is a list of edges. The first line is a single number indicating 
+		 * the number of vertices in the graph. Each subsequent line gives two white-space 
+		 * separated integers representing the origin and destination of an edge, respectively.
+		 * E.g., Figure 1 of @cite waldo would be represented as follows:
+		 * <pre>4
+		 * 0 1 
+		 * 1 0 
+		 * 1 2 
+		 * 1 3 
+		 * 2 1 
+		 * 2 3 
+		 * 3 1 
+		 * 3 2</pre>
+		 */		
+		edgeList
+	};
+}
 
 
 /**
@@ -135,7 +137,8 @@ public:
 	 * consisting of the example UnlabelledGraph from Figure 1 of @cite waldo ,
 	 * represented in the adjacency list format.
 	 */
-	UnlabelledGraph( const std::string filename, const uint32_t file_type );
+	UnlabelledGraph( const std::string filename, 
+		const graphAnon::FileFormat format = graphAnon::FileFormat::adjacencyList );
 
 
 	/**
@@ -335,6 +338,7 @@ protected:
 	
 	uint32_t n_; /**< The number of vertices in the graph. */
 	uint32_t m_; /**< The number of edges in the graph. */
+	graphAnon::FileFormat const io_format_; /**< The file format for reading/writing graphs. */
 	
 	/**
 	 * The adjacency list: adjacency_list[i] is a set

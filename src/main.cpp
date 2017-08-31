@@ -3,11 +3,7 @@
  * @brief The main driver for the GraphAnon suite.
  * It parses user input to generate and anonymise a Graph.
  *
- * @date 22 Oct 2015
- * @version 2.0
- * @author Sean Chester (sean.chester@idi.ntnu.no)
- *
- * @copyright Copyright (c) 2015 Sean Chester
+ * @copyright Copyright (c) 2015-2017 Sean Chester
  * <br />
  * This file is part of the GraphAnon suite.
  * GraphAnon, version 2.0, is distributed freely under the *MIT License*:
@@ -246,13 +242,13 @@ uint32_t run_identity_mode( int argc, char** argv ) {
 	if( filename != 0 ) {
 		char *format = getCmdOption( argv, argv + argc, "-format", true );
 		if( format == 0 || strcmp( format, "adjList" ) == 0 ) {
-			g = new UnlabelledGraph( filename, FILE_TYPE_ADJLIST );
+			g = new UnlabelledGraph( filename, graphAnon::FileFormat::adjacencyList );
 		}
 		else if( strcmp( format, "edgeList" ) == 0 ) {
-			g = new UnlabelledGraph( filename, FILE_TYPE_EDGELIST );
+			g = new UnlabelledGraph( filename, graphAnon::FileFormat::edgeList );
 		}
 		else if( strcmp( format, "adjListVL" ) == 0 ) {
-			g = new UnlabelledGraph( filename, FILE_TYPE_ADJLIST_VL );
+			g = new UnlabelledGraph( filename, graphAnon::FileFormat::adjacencyListVertexLabelled );
 		}
 		else {
 			std::cerr << std::endl

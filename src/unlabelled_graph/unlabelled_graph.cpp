@@ -1,13 +1,9 @@
 /**
  * @file
  * @brief Implementation of the UnlabelledGraph class in unlabelled_graph.h
- *
- * @date 22 Oct 2015
- * @version 2.0
- * @author Sean Chester (sean.chester@idi.ntnu.no)
  * @see unlabelled_graph.tpp for the implementation of templated functions.
  *
- * @copyright Copyright (c) 2015 Sean Chester
+ * @copyright Copyright (c) 2015-2017 Sean Chester
  * <br />
  * This file is part of the GraphAnon suite.
  * GraphAnon, version 2.0, is distributed freely under the *MIT License*:
@@ -67,12 +63,15 @@ void UnlabelledGraph::init() {
 }
 
 UnlabelledGraph::UnlabelledGraph( const uint32_t num_vertices ) :
-	n_ ( num_vertices ) { init(); }
+	n_ ( num_vertices ), io_format_( graphAnon::FileFormat::adjacencyList ) { init(); }
 
 
-UnlabelledGraph::UnlabelledGraph() : n_ ( 0 ) { init(); }
+UnlabelledGraph::UnlabelledGraph() : n_ ( 0 ), 
+	io_format_( graphAnon::FileFormat::adjacencyList ) { init(); }
 
-UnlabelledGraph::UnlabelledGraph( const std::string filename, const uint32_t file_type ) {
+UnlabelledGraph::UnlabelledGraph( const std::string filename, graphAnon::FileFormat format )
+	: io_format_( format )
+{
 	std::string line;
 	std::cout << filename << std::endl;
 	std::ifstream infile( filename );
@@ -99,12 +98,14 @@ UnlabelledGraph::UnlabelledGraph( const std::string filename, const uint32_t fil
 	 */
 	init();
 	
-	if( file_type == FILE_TYPE_ADJLIST || file_type == FILE_TYPE_ADJLIST_VL ) {
+	if( io_format_ == graphAnon::FileFormat::adjacencyList 
+		|| io_format_ == graphAnon::FileFormat::adjacencyListVertexLabelled )
+	{
 	
 		uint32_t v;
 			
 		/* check if extra meta data for label set size and throw out. */
-		if( file_type == FILE_TYPE_ADJLIST_VL ) {
+		if( io_format_ == graphAnon::FileFormat::adjacencyListVertexLabelled ) {
 			iss >> v;
 		}
 
@@ -121,7 +122,7 @@ UnlabelledGraph::UnlabelledGraph( const std::string filename, const uint32_t fil
 			std::istringstream iss( line );
 			
 			/* if labelled, throw out label first. */
-			if( file_type == FILE_TYPE_ADJLIST_VL ) {
+			if( io_format_ == graphAnon::FileFormat::adjacencyListVertexLabelled ) {
 				iss >> v;
 			}
 
@@ -133,7 +134,7 @@ UnlabelledGraph::UnlabelledGraph( const std::string filename, const uint32_t fil
 			while( iss >> v ) { add_edge( u, v ); }
 		}
 	}
-	else if( file_type == FILE_TYPE_EDGELIST ) {
+	else if( io_format_ == graphAnon::FileFormat::edgeList ) {
 		uint32_t u, v;
 		/* Iterate every edge in the input file. */
 		while( std::getline( infile, line ) ) {
