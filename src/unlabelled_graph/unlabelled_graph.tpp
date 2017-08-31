@@ -199,7 +199,7 @@ uint32_t inline anonymize_degree_sequence( DegreeSequence *degrees, const uint32
 	 */
 	for( uint32_t i = n - 1; i < n; i = starts[ i ] - 1 ) {
 		const uint32_t block_start = starts[ i ];
-		assert( block_start < i );
+		assert( block_start <= i );
 		const uint32_t block_degree = degrees->at( block_start ).first;
 		assert( block_degree <= n );
 		for( uint32_t j = block_start + 1; j <= i; ++j ) {
