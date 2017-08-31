@@ -68,7 +68,8 @@ void print_usage_instructions( const char *bin_path ) {
 	std::cout << "\t\t[-h] or [--help] shows these usage instructions" << std::endl;
 	std::cout << "\t\t[-mode {identity,attribute} [type of anonymization to conduct]]" << std::endl;
 	std::cout << "\t\t[-f [path to input file]]" << std::endl;
-	std::cout << "\t\t[-format {adjList, edgeList, adjListVL} [format of input file (adjList by default)]]" << std::endl;
+	std::cout << "\t\t[-format {adjList, edgeList, adjListVL} [format to read/write "
+		<< "input/output files (adjList by default)]]" << std::endl;
 	std::cout << "\t\t[-o [path to output file]]" << std::endl;
 	std::cout << "\t\t[-k [identity privacy threshold]]" << std::endl;
 	std::cout << "\t\t[-alpha [attribute privacy threshold]]" << std::endl;

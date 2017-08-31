@@ -422,12 +422,28 @@ double UnlabelledGraph::subgraph_centrality( const uint32_t limit ) {
 
 std::ostream& operator << ( std::ostream& os, UnlabelledGraph const& g )
 {
+	// Just ignoring the vertex labels	
 	os << g.n_ << std::endl;
-	for( uint32_t i = 0; i < g.n_; ++i ) {
-		for( auto it = g.adjacency_list_[i].begin(); it != g.adjacency_list_[i].end(); ++it ) {
-			os << *it << " ";
+
+	for( uint32_t u = 0; u < g.n_; ++u ) {
+		for( uint32_t const v : g.adjacency_list_[ u ] )
+		{
+			if( u <= v ) // only print undirected
+			{
+				if( g.io_format_ == graphAnon::FileFormat::edgeList )
+				{
+					os << u << " " << v << std::endl;
+				}
+				else
+				{
+					os << v << " ";
+				}
+			}
 		}
-		os << std::endl;
+		if( g.io_format_ != graphAnon::FileFormat::edgeList )
+		{	
+			os << std::endl;
+		}
 	}
 	return os;
 }
