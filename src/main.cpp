@@ -202,7 +202,7 @@ uint32_t run_attribute_mode( int argc, char** argv ) {
 	if( output_filename != NULL ) {
 		std::ofstream outfile;
 		outfile.open( output_filename );
-		g->print( &outfile );
+		outfile << *g;
 		outfile.close();
 	}
 	
@@ -308,7 +308,7 @@ uint32_t run_identity_mode( int argc, char** argv ) {
 	if( output_filename != NULL ) {
 		std::ofstream outfile;
 		outfile.open( output_filename );
-		g->print( &outfile );
+		outfile << *g;
 		outfile.close();
 	}
 	

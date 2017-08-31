@@ -274,16 +274,8 @@ public:
 	 */
 	template < bool hide_new_vertices >
 	void hide_waldo( const uint32_t k );
-
-	/**
-	 * Prints the graph to outstream in adjacency list format
-	 * (primarily for the purpose of testing).
-	 * @param outstream The file stream to which the UnlabelledGraph should be output
-	 * @see <a href="../../workloads/snam_example.adjList">An example file</a>
-	 * consisting of the example Graph from Figure 1 of @cite waldo ,
-	 * represented in the adjacency list format.
-	 */
-	void print( std::ofstream *outstream );
+	
+	friend std::ostream& operator << ( std::ostream& os, UnlabelledGraph const& g );
 
 protected:
 

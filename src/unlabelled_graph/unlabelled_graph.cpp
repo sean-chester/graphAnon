@@ -420,12 +420,14 @@ double UnlabelledGraph::subgraph_centrality( const uint32_t limit ) {
 	return summation / n_;
 }
 
-void UnlabelledGraph::print( std::ofstream *outstream ) {
-	(*outstream) << n_ << std::endl;
-	for( uint32_t i = 0; i < n_; ++i ) {
-		for( auto it = adjacency_list_[i].begin(); it != adjacency_list_[i].end(); ++it ) {
-			(*outstream) << *it << " ";
+std::ostream& operator << ( std::ostream& os, UnlabelledGraph const& g )
+{
+	os << g.n_ << std::endl;
+	for( uint32_t i = 0; i < g.n_; ++i ) {
+		for( auto it = g.adjacency_list_[i].begin(); it != g.adjacency_list_[i].end(); ++it ) {
+			os << *it << " ";
 		}
-		(*outstream) << std::endl;
+		os << std::endl;
 	}
+	return os;
 }
