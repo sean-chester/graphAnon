@@ -1,11 +1,8 @@
+# GraphAnon -- Software for anonymizing graphs and social networks
 
-|     GraphAnon, version 2.0       |
-|:--------------------------------:|
-|       © 2015 Sean Chester        |
-|   (sean.chester@idi.ntnu.no)     |
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-------------------------------------
-
+-----------------------------------
 
 ### Table of Contents 
 
