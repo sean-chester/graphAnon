@@ -168,12 +168,12 @@ public:
 	/**
 	 * Accessor method to retrieve the number of vertices in the graph, |V|.
 	 */
-	uint32_t num_vertices();
+	uint32_t num_vertices() const;
 	
 	/**
 	 * Accessor method to retrieve the number of edges in the graph, |E|.
 	 */
-	uint32_t num_edges();
+	uint32_t num_edges() const;
 
 	/**
 	 * Populates the UnlabelledGraph with num_edges undirected edges, 
@@ -197,12 +197,12 @@ public:
 	 * @return If E is the edge set and V is the vertex set, the return value is
 	 * |E| / |V| / ( |V| - 1 ). Will also return 0 if |V| = 0.
 	 */
-	float get_occupancy();
+	float get_occupancy() const;
 	
 	/**
 	 * Calculates the clustering coefficient of the graph.
 	 */
-	float clustering_coefficient();
+	float clustering_coefficient() const;
 	
 	/**
 	 * Calculates the harmonic mean of the graph from a hop plot.
@@ -210,7 +210,7 @@ public:
 	 * @returns The harmonic mean of the graph.
 	 * @pre Assumes that hop_plot has been populated with a call to hop_plot()
 	 */
-	float harmonic_mean( HopPlot *hop_plot );
+	float harmonic_mean( HopPlot const& hop_plot ) const;
 	
 	/**
 	 * Calculates the average path length of the graph from a hop plot.
@@ -225,7 +225,7 @@ public:
 	 * @pre Assumes that hop_plot has been populated with a call to hop_plot()
 	 */
 	template <bool include_self_paths >
-	float average_path_length( HopPlot *hop_plot );
+	float average_path_length( HopPlot *hop_plot ) const;
 	
 	/**
 	 * Calculates the subgraph centrality of the graph.
@@ -233,7 +233,7 @@ public:
 	 * centrality.
 	 * @returns The subgraph centrality of the graph.
 	 */
-	double subgraph_centrality( const uint32_t limit );
+	double subgraph_centrality( const uint32_t limit ) const;
 	
 	/**
 	 * Populates the hop plot for this graph.
@@ -243,9 +243,9 @@ public:
 	 * hop plot data for this graph.
 	 * @see average_path_length()
 	 */
-	void hop_plot( HopPlot *hop_plot );
+	HopPlot hop_plot() const;
 
-	bool is_complete();
+	bool is_complete() const;
 	
 	/**
 	 * Determines whether or not the UnlabelledGraph is 
@@ -256,7 +256,7 @@ public:
 	 * @returns True if the UnlabelledGraph is k-degree-anonymous; 
 	 * false if not.
 	 */
-	bool is_anonymous( const uint32_t k );
+	bool is_anonymous( const uint32_t k ) const;
 	
 	/**
 	 * Modifies the UnlabelledGraph so that it is k-degree-anonymous 
@@ -313,7 +313,7 @@ protected:
 	 * @post degrees is emptied and then populated with a list of degrees 
 	 * for each vertex, not necessarily unique and in ascending order.
 	 */
-	void inline retrieve_degree_sequence( DegreeSequence *degrees );
+	DegreeSequence retrieve_degree_sequence() const;
 
 	/**
 	 * Returns the path length between vertex u and vertex v.
@@ -323,7 +323,7 @@ protected:
 	 * minimum number of edges that must be traversed in order to 
 	 * reach v from u.
 	 */
-	int inline calculate_path_length( uint32_t u, uint32_t v );
+	int calculate_path_length( uint32_t u, uint32_t v ) const;
 
 
 	/* Member variables */
@@ -357,7 +357,7 @@ private:
 	 * @see average_path_length()
 	 */
 	template <bool include_self_paths >
-	float average_path_length_brute_force();
+	float average_path_length_brute_force() const;
 	
 	/**
 	 * Calculates the clustering coefficient of the graph in a slow 
@@ -366,7 +366,7 @@ private:
 	 * @note This method is slow and primarily for testing purposes.
 	 * @see clustering_coefficient()
 	 */
-	float clustering_coefficient_brute_force();
+	float clustering_coefficient_brute_force() const;
 };
 
 #include "unlabelled_graph.tpp"

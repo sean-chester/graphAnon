@@ -34,52 +34,9 @@
 
 #include "omp.h"
 
-int inline UnlabelledGraph::calculate_path_length( uint32_t u, uint32_t v ) {
-	std::unordered_set< uint32_t > visited;
-	std::queue< std::pair< uint32_t, uint32_t > > q; /* (vertex, path length) pairs. */
-	
-	/* Check if source and destination are the same. */
-	if( u == v ) { return 0; }
-	
-	/* Insert all direct neighbours into the visited list. */
-	for( auto it = adjacency_list_[ u ].begin(); it != adjacency_list_[ u ].end(); ++it ) {
-	
-		/* If neighbour is v, we are done. */
-		if( *it == v ) { 
-			return 1; 
-		}
-		/* Otherwise, push it onto the queue for revisiting in breadth-first order. */
-		else {
-			q.push( std::pair< uint32_t, uint32_t >( *it, 1 ) );
-			visited.insert( *it );
-		}
-	}
-	
-	while( !q.empty() ) {
-	
-		/* Pop top off the queue. */
-		const uint32_t vertex = q.front().first;
-		const uint32_t num_hops = q.front().second;
-		q.pop();
-		
-		/* Iterate neighbours of vertex to see if they are v. */
-		std::unordered_set< uint32_t > *neighbours = &( adjacency_list_[ vertex ] );
-		for( auto it = neighbours->begin(); it != neighbours->end(); ++it ) {
-			/* First check if we have found our destination. */
-			if( *it == v ) { return num_hops + 1; }
-			
-			/* Otherwise, push it onto the queue if we have not already visited it. */
-			else if( visited.count( *it ) == 0 ) {
-				visited.insert( *it );
-				q.push( std::pair< uint32_t, uint32_t >( *it, num_hops + 1 ) );
-			}
-		}
-	} 
-	return -1;
-}
 
 template <bool include_self_paths >
-float UnlabelledGraph::average_path_length_brute_force() {
+float UnlabelledGraph::average_path_length_brute_force() const {
 	uint32_t sum_of_path_lengths = 0;
 	uint32_t number_of_connected_paths = 0;
 	
@@ -108,7 +65,7 @@ float UnlabelledGraph::average_path_length_brute_force() {
 }
 
 template <bool include_self_paths >
-float UnlabelledGraph::average_path_length( HopPlot *hop_plot ) {
+float UnlabelledGraph::average_path_length( HopPlot *hop_plot ) const {
 	
 	//return average_path_length_brute_force< include_self_paths >();
 	
@@ -124,7 +81,7 @@ float UnlabelledGraph::average_path_length( HopPlot *hop_plot ) {
 		}
 	}
 	
-	return ( count == 0 ? 0 : sum / (float) count );
+	return ( count == 0 ? 0 : sum / static_cast< float >( count ) );
 }
 
 /**
@@ -211,19 +168,6 @@ uint32_t inline anonymize_degree_sequence( DegreeSequence *degrees, const uint32
 	return costs[ n - 1 ];
 }
 
-void inline UnlabelledGraph::retrieve_degree_sequence( DegreeSequence *degrees ) {
-	
-	/* First create list of pairs. */
-	degrees->clear();
-	for( uint32_t i = 0; i < n_; ++i ) {
-		const uint32_t next_degree = adjacency_list_[ i ].size();
-		degrees->push_back( std::pair< uint32_t, uint32_t >( next_degree, i ) );
-	}
-	
-	/* Then sort them by descending degree. */
-	std::sort( degrees->begin(), degrees->end(), 
-		std::greater< std::pair< uint32_t, uint32_t > >() );
-}
 
 template < bool hide_new_vertices >
 void UnlabelledGraph::hide_waldo( const uint32_t k ) {
@@ -231,8 +175,7 @@ void UnlabelledGraph::hide_waldo( const uint32_t k ) {
 	assert( k <= n_ );
 	
 	/* Section 3.1: First anonymize degree sequence. */
-	DegreeSequence degrees;
-	retrieve_degree_sequence( &degrees );
+	DegreeSequence degrees = retrieve_degree_sequence();
 	DegreeSequence anon_degrees( degrees );
 	uint32_t max_def = anonymize_degree_sequence( &anon_degrees, k );
 	

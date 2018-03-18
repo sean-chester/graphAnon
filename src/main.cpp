@@ -106,13 +106,12 @@ void inline print_stats( UnlabelledGraph *g ) {
 	std::cout << "Occ: " << g->get_occupancy() << std::endl;
 	std::cout << " CC: " << g->clustering_coefficient() << std::endl;
 	std::cout << " SC: " << g->subgraph_centrality( 120 ) << std::endl;
-	HopPlot hop_plot;
-	g->hop_plot( &hop_plot );
+	HopPlot hop_plot = g->hop_plot();
 	std::cout << " HP: ";
 	for( auto it = hop_plot.begin(); it != hop_plot.end(); ++it ) { std::cout << it->first << ":" << it->second << " "; }
 	std::cout << std::endl;
 	std::cout << "APL: " << g->average_path_length< true >( &hop_plot ) << std::endl;
-	std::cout << " HM: " << g->harmonic_mean( &hop_plot ) << std::endl;
+	std::cout << " HM: " << g->harmonic_mean( hop_plot ) << std::endl;
 }
 
 

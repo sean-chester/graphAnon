@@ -43,17 +43,15 @@
 #include <unordered_map>
 #include <queue>
 
+#include <numeric>		/* for std::accumulate() */
+
 #include "omp.h"
 
 #include "unlabelled_graph.h" /* implementing this class. */
 
 void UnlabelledGraph::init() {
-	/* Initialize adjacency list with n_ empty vectors and every vertex
-	 * to have the same label. */
-	adjacency_list_.reserve( n_ );
-	for( uint32_t i = 0; i < n_ ; ++i ) {
-		adjacency_list_.push_back( std::unordered_set< uint32_t >() );
-	}
+	
+	adjacency_list_ = AdjacencyList( n_ );
 
 	/* Originally, there are no edges yet (every vertex is isolated). */
 	m_ = 0;
@@ -147,8 +145,8 @@ UnlabelledGraph::UnlabelledGraph( const std::string filename, graphAnon::FileFor
 
 UnlabelledGraph::~UnlabelledGraph() {}
 
-uint32_t UnlabelledGraph::num_vertices() { return n_; }
-uint32_t UnlabelledGraph::num_edges() { return m_; }
+uint32_t UnlabelledGraph::num_vertices() const { return n_; }
+uint32_t UnlabelledGraph::num_edges() const { return m_; }
 
 bool UnlabelledGraph::add_edge( const uint32_t u, const uint32_t v ) {
 	if( adjacency_list_[ u ].count( v ) > 0 || u == v ) { return false; }
@@ -161,10 +159,8 @@ bool UnlabelledGraph::add_edge( const uint32_t u, const uint32_t v ) {
 
 void UnlabelledGraph::add_vertices( const uint32_t num_vertices ) {
 
-	for( uint32_t i = 0; i < num_vertices ; ++i ) {
-		adjacency_list_.push_back( std::unordered_set< uint32_t >() );
-	}
 	n_ += num_vertices;
+	adjacency_list_.resize( n_ );
 }
 
 void UnlabelledGraph::add_random_edge() {
@@ -200,22 +196,22 @@ bool UnlabelledGraph::populate_uniformly( const uint32_t num_edges ) {
 	 * exist in the graph.
 	 */
 	uint32_t num_added = 0;
-	for( auto it = possible_edges.begin(); it != possible_edges.end(); ++it ) {
-		if ( add_edge( it->first, it->second ) ) {
+	for( auto const& e : possible_edges ) {
+		if ( add_edge( e.first, e.second ) ) {
 			if( ++num_added == num_edges ) { return true; } /* Done! */
 		}
 	}
 	return false; /* should be an unreachable statement! */
 }
 
-bool UnlabelledGraph::is_complete() { return m_ == n_ * ( n_ - 1 ); }
+bool UnlabelledGraph::is_complete() const { return m_ == n_ * ( n_ - 1 ); }
 
-bool UnlabelledGraph::is_anonymous( const uint32_t k ) {
+bool UnlabelledGraph::is_anonymous( const uint32_t k ) const {
 
 	/* First calculate the counts for every degree in the graph. */
 	std::unordered_map< uint32_t, uint32_t > degree_counts;
-	for (uint32_t i = 0; i < n_; ++i ) {
-		const uint32_t next_degree = adjacency_list_[ i ].size();
+	for( auto const& neighbours : adjacency_list_ ) {
+		const uint32_t next_degree = neighbours.size();
 		if( degree_counts.count( next_degree ) == 0 ) {
 			degree_counts[ next_degree ] = 1;
 		}
@@ -223,30 +219,93 @@ bool UnlabelledGraph::is_anonymous( const uint32_t k ) {
 	}
 	
 	/* Then ensure every count is at least k. */
-	for( auto it = degree_counts.begin(); it != degree_counts.end(); ++it ) {
-		if( it->second < k ) { return false; }
+	for( auto const count : degree_counts ) {
+		if( count.second < k ) { return false; }
 	}
 	return true;
 }
 
-float UnlabelledGraph::get_occupancy() {
+float UnlabelledGraph::get_occupancy() const {
 	if( n_ == 0 ) { return 0; }
-	else return m_ / (float) ( n_ * ( n_ - 1 ) ) * 2; /* x2 because undirected */
+	else return m_ / static_cast< float >( ( n_ * ( n_ - 1 ) ) * 2 ); /* x2 because undirected */
 }
 
-float UnlabelledGraph::clustering_coefficient() {
+
+DegreeSequence UnlabelledGraph::retrieve_degree_sequence() const {
 	
-	//return clustering_coefficient_brute_force();
+	/* First create list of pairs. */
+	DegreeSequence degrees;
+	uint32_t i = 0;
+	std::transform( adjacency_list_.cbegin(), adjacency_list_.cend(), std::back_inserter( degrees ),
+		[ &i ]( auto const& neighbour_list ) {
+		 return std::make_pair( neighbour_list.size(), i++ );
+		}
+	);
+	
+	/* Then sort them by descending degree. */
+	std::sort( degrees.begin(), degrees.end(), 
+		std::greater< std::pair< uint32_t, uint32_t > >() );
+
+	return degrees;
+}
+
+
+int UnlabelledGraph::calculate_path_length( uint32_t u, uint32_t v ) const {
+	std::unordered_set< uint32_t > visited;
+	std::queue< std::pair< uint32_t, uint32_t > > q; /* (vertex, path length) pairs. */
+	
+	/* Check if source and destination are the same. */
+	if( u == v ) { return 0; }
+	
+	/* Insert all direct neighbours into the visited list. */
+	for( auto const neighbour : adjacency_list_[ u ] ) {
+	
+		/* If neighbour is v, we are done. */
+		if( neighbour == v ) { 
+			return 1; 
+		}
+		/* Otherwise, push it onto the queue for revisiting in breadth-first order. */
+		else {
+			q.push( std::make_pair( v, 1 ) );
+			visited.insert( v );
+		}
+	}
+	
+	while( !q.empty() ) {
+	
+		/* Pop top off the queue. */
+		const uint32_t vertex = q.front().first;
+		const uint32_t num_hops = q.front().second;
+		q.pop();
+		
+		/* Iterate neighbours of vertex to see if they are v. */
+		for( auto const neighbour : adjacency_list_[ vertex ] ) {
+			/* First check if we have found our destination. */
+			if( neighbour == v ) { return num_hops + 1; }
+			
+			/* Otherwise, push it onto the queue if we have not already visited it. */
+			else if( visited.count( neighbour ) == 0 ) {
+				q.push( std::make_pair( neighbour, num_hops + 1 ) );
+				visited.insert( neighbour );
+			}
+		}
+	} 
+	return -1;
+}
+
+float UnlabelledGraph::clustering_coefficient() const {
 	
 	uint64_t closed_triangles = 0;
-	uint64_t possible_triangles = 0;
-	
+
 	/* First count denominator -- how many open triangles exist. */
-#pragma omp parallel for reduction( +: possible_triangles )
-	for( uint32_t i = 0; i < n_; ++i ) {
-		NeighbourList *my_neighbours = &( adjacency_list_[ i ] );
-		possible_triangles += my_neighbours->size() * ( my_neighbours->size() - 1 );
-	} 
+	uint64_t possible_triangles = std::accumulate( 
+		adjacency_list_.cbegin(), adjacency_list_.cend(), 0llu,
+		[]( auto const sum, auto const& neighbour_list )
+		{
+			return sum + neighbour_list.size() * ( neighbour_list.size() - 1 );
+		}
+	);
+
 	
 	/* Then count numerator -- how many closed triangles exist. */
 #pragma omp parallel for reduction( +: closed_triangles )
@@ -260,10 +319,10 @@ float UnlabelledGraph::clustering_coefficient() {
 		}
 	}
 	
-	return closed_triangles / (float) possible_triangles;
+	return closed_triangles / static_cast< float >( possible_triangles );
 }
 
-float UnlabelledGraph::clustering_coefficient_brute_force() {
+float UnlabelledGraph::clustering_coefficient_brute_force() const {
 	uint64_t closed_triangles = 0;
 	uint64_t possible_triangles = 0;
 	
@@ -290,7 +349,7 @@ float UnlabelledGraph::clustering_coefficient_brute_force() {
 }
 
 
-void UnlabelledGraph::hop_plot( HopPlot *hop_plot ) {
+HopPlot UnlabelledGraph::hop_plot() const {
 
 	std::unordered_set< uint32_t > visited;
 	std::queue< std::pair< uint32_t, uint32_t > > q; /* (vertex, path length) pairs. */	
@@ -300,25 +359,25 @@ void UnlabelledGraph::hop_plot( HopPlot *hop_plot ) {
 	{
 		num_threads = omp_get_num_threads();
 	}
-	HopPlot hopplots[ num_threads ];
+	std::vector< HopPlot > hopplots( num_threads );
 	
 #pragma omp parallel for private( visited, q )
 	for( uint32_t i = 0; i < n_; ++i ) {
 		
-		HopPlot *my_hop_plot = hopplots + omp_get_thread_num();
+		HopPlot & my_hop_plot = hopplots[ omp_get_thread_num() ];
 
 		/* clear queue and visited set, although set i so we don't loop. */
 		visited.clear();
 		visited.insert( i );
 	
 		/* Init queue to contain all direct neighbours of vertex i. */
-		for( auto it = adjacency_list_[ i ].begin(); it != adjacency_list_[ i ].end(); ++it ) {
-			q.push( std::pair< uint32_t, uint32_t >( *it, 1 ) );
-			visited.insert( *it );
+		for( auto const neighbour : adjacency_list_[ i ] ) {
+			q.push( std::make_pair( neighbour, 1 ) );
+			visited.insert( neighbour );
 		}
 		/* Add all neighbours of i to hop plot score = 1. */
-		if( my_hop_plot->count( 1 ) == 1 ) { my_hop_plot->at( 1 ) += adjacency_list_[ i ].size(); }
-		else { (*my_hop_plot)[ 1 ] = adjacency_list_[ i ].size(); }
+		if( my_hop_plot.count( 1 ) == 1 ) { my_hop_plot.at( 1 ) += adjacency_list_[ i ].size(); }
+		else { ( my_hop_plot)[ 1 ] = adjacency_list_[ i ].size(); }
 	
 		/* Iterate breadth-first through remaining paths. */
 		while( ! q.empty() ) {
@@ -326,38 +385,52 @@ void UnlabelledGraph::hop_plot( HopPlot *hop_plot ) {
 			const uint32_t d = q.front().second;
 			q.pop();
 		
-			for( auto it = adjacency_list_[ v ].begin(); it != adjacency_list_[ v ].end(); ++it ) {
-				if( visited.count( *it ) == 0 ) {
-					visited.insert( *it );
-					q.push( std::pair< uint32_t, uint32_t >( *it, d + 1 ) );
-					if( my_hop_plot->count( d + 1 ) == 0 ) { (*my_hop_plot)[ d + 1 ] = 1; }
-					else { ++my_hop_plot->at( d + 1 ); }
+			for( auto const neighbour : adjacency_list_[ v ] ) {
+				if( visited.count( neighbour ) == 0 ) {
+					visited.insert( neighbour );
+					q.push( std::make_pair( neighbour, d + 1 ) );
+
+					if( my_hop_plot.count( d + 1 ) == 0 ) { my_hop_plot[ d + 1 ] = 1; }
+					else { ++my_hop_plot.at( d + 1 ); }
 				}
 			}
 		}
 	}
 		
 	/* Reduce all the hop plots from each thread. */
-	for( uint32_t t = 0; t < num_threads; ++t ) {
-		for( auto it = hopplots[ t ].begin(); it != hopplots[ t ].end(); ++it ) {
-			if( hop_plot->count( it->first ) == 0 ) { (*hop_plot)[ it->first ] = it->second; }
-			else { hop_plot->at( it->first ) += it->second; }
-		}
-	}
+	auto & result = hopplots[ 0 ];
+	std::for_each( std::next( hopplots.cbegin(), 1 ), hopplots.cend(),
+		[ &result ]( auto const& hopplot )
+		{
+			for( auto const& hp_entry : hopplot ) {
+				if( result.count( hp_entry.first ) == 0 )
+				{
+					result.insert( std::make_pair( hp_entry.first, hp_entry.second ) );
+				}
+				else
+				{
+					result[ hp_entry.first ] += hp_entry.second;
+				}
+			}
+	} );
+	return result;
 }
 
 
-float UnlabelledGraph::harmonic_mean( HopPlot *hop_plot ) {
-	float h = 0;
+float UnlabelledGraph::harmonic_mean( HopPlot const& hop_plot ) const {
 	
-	for( auto it = hop_plot->begin(); it != hop_plot->end(); ++it ) {
-		h += it->second / (float) it->first; 
-	}
-	return ( h == 0 ? -1 : n_ * ( n_ - 1 ) / h );
+	float const mean = std::accumulate( hop_plot.cbegin(), hop_plot.cend(), 0.0,
+		[]( float const f, auto const& hp )
+		{
+			return f + hp.second / static_cast< float >( hp.first );
+		}
+	);
+
+	return mean == 0 ? -1.0 : n_ * ( n_ - 1 ) / mean;
 }
 
 /* Computes sc by repeatedly exponentiating matrix and summing diagonals. */
-double UnlabelledGraph::subgraph_centrality( const uint32_t limit ) {
+double UnlabelledGraph::subgraph_centrality( const uint32_t limit ) const {
 	double summation = 0;
 	double factorial = 1;
 	
@@ -377,10 +450,9 @@ double UnlabelledGraph::subgraph_centrality( const uint32_t limit ) {
 			adjacency_matrix_to_lth[ offset + j ] = 0;
 		}
 		
-		NeighbourList *neighbours = &( adjacency_list_[ i ] );
-		for( auto it = neighbours->cbegin(); it != neighbours->cend(); ++it ) {
-			adjacency_matrix[ offset + *it ] = 1;
-			adjacency_matrix_to_lth[ offset + *it ] = 1;
+		for( auto const neighbour : adjacency_list_[ i ] ) {
+			adjacency_matrix[ offset + neighbour ] = 1;
+			adjacency_matrix_to_lth[ offset + neighbour ] = 1;
 		}
 	}
 	
@@ -409,9 +481,7 @@ double UnlabelledGraph::subgraph_centrality( const uint32_t limit ) {
 		}
 		
 		/* swap buffers */
-		double *tmp = adjacency_matrix_to_lth;
-		adjacency_matrix_to_lth = new_values;
-		new_values = tmp;
+		std::swap( adjacency_matrix_to_lth, new_values );
 	}
 	
 	delete [] adjacency_matrix;
