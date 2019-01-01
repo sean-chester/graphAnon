@@ -1,6 +1,6 @@
 # GraphAnon -- Software for anonymizing graphs and social networks
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![](https://img.shields.io/github/license/sean-chester/graphAnon.svg)
 
 -----------------------------------
 
