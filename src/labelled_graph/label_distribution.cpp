@@ -53,7 +53,7 @@ LabelDistribution::LabelDistribution( std::vector< uint32_t > *counts ) {
 LabelDistribution::~LabelDistribution( ) { }
 
 float LabelDistribution::get_frequency( const uint32_t pos ) {
-	if( pos > frequencies_.size() || sum_ == 0 ) { return 0; }
+	if( pos >= frequencies_.size() || sum_ == 0 ) { return 0; }
 	else return frequencies_[ pos ] / (float) sum_;
 }
 
